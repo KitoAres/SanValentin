@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Quieres Ser Mi San Valentín?</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* Fondo de anime */
+            background: url('https://wallpapers.com/images/featured-full/pareja-de-anime-xyev5mudcvnzo825.jpg') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+        }
+
+        /* Capa rosada semitransparente */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 192, 203, 0.4); 
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 2px solid #ff4d94;
+            max-width: 90%;
+            width: 400px; /* Ancho fijo para que no baile al aparecer el audio */
+        }
+
+        h1 {
+            color: #d81b60;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Estilos del reproductor de audio */
+        audio {
+            width: 100%;
+            margin-bottom: 25px;
+            height: 40px;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button {
+            padding: 15px 35px;
+            font-size: 1.3em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button#yesBtn {
+            background: linear-gradient(45deg, #ff4d94, #ff80bf);
+            color: white;
+        }
+
+        button#yesBtn:hover {
+            transform: scale(1.2);
+            box-shadow: 0 8px 20px rgba(255, 77, 148, 0.5);
+        }
+
+        button#noBtn {
+            background-color: #fce4ec;
+            color: #d81b60;
+            border: 1px solid #d81b60;
+        }
+
+        .heart {
+            position: absolute;
+            color: #ff3385;
+            font-size: 20px;
+            user-select: none;
+            pointer-events: none;
+            z-index: 1;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .response-screen {
+            display: none;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .shrink-out {
+            transform: scale(0) rotate(720deg);
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="mainContainer">
+        <h1 id="questionText">Hiii ¿Quieres ser mi San Valentín? ❤️</h1>
+        
+        <p style="font-size: 0.9em; color: #d81b60; margin-bottom: 5px;">🎵 Dale play 🎵</p>
+        <audio id="player" controls>
+            <source src="https://github.com/KitoAres/Resources/raw/refs/heads/main/Toby_Fox_-_Home_(mp3.pm).mp3" type="audio/mpeg">
+            Tu navegador no soporta el audio.
+        </audio>
+
+        <div class="buttons" id="choiceButtons">
+            <button id="yesBtn">¡SÍ! 😍</button>
+            <button id="noBtn">No...</button>
+        </div>
+    </div>
+
+    <div class="container response-screen" id="yesResponse">
+        <h1>¡Sabía que dirías que sí!💖</h1>
+        <p style="font-size: 1.5em; color: #ad1457;">¡Eres mi persona favorita! 😊✨</p>
+    </div>
+
+    <div class="container response-screen" id="noResponse">
+        <h1>Entiendo... 😔</h1>
+        <p>Aún así, que tengas un bonito día y la pases genial.</p>
+    </div>
+
+    <script>
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const mainContainer = document.getElementById('mainContainer');
+        const yesResponse = document.getElementById('yesResponse');
+        const noResponse = document.getElementById('noResponse');
+        const questionText = document.getElementById('questionText');
+        const player = document.getElementById('player');
+
+        // Intentar activar audio al primer clic en cualquier parte (backup)
+        window.addEventListener('click', () => {
+            player.play().catch(e => console.log("Esperando play manual"));
+        }, { once: true });
+
+        yesBtn.addEventListener('click', () => {
+            mainContainer.style.display = 'none';
+            yesResponse.style.display = 'block';
+            player.play(); // Suena al aceptar
+            confettiEffect(); 
+        });
+
+        let noClickCount = 0;
+
+        noBtn.addEventListener('click', () => {
+            noClickCount++;
+            player.play(); // Sonido y controles del sonido
+            
+            if (noClickCount === 1) {
+                questionText.textContent = "¿Estás segura? 🥺";
+                noBtn.style.transform = "scale(0.8)";
+            } else if (noClickCount === 2) {
+                questionText.textContent = "Piénsalo bien... 👉👈";
+                noBtn.style.transform = "scale(0.6)";
+            } else if (noClickCount === 3) {
+                questionText.textContent = "Chale... ¡Di que sí! 😭";
+                noBtn.style.transform = "scale(0.4)";
+                yesBtn.style.transform = `scale(${1 + (noClickCount * 0.2)})`;
+            } else {
+                noBtn.classList.add('shrink-out');
+                setTimeout(() => {
+                    alert("¡Error de sistema! Solo se permite una respuesta positiva. 😉");
+                    noBtn.style.display = "none";
+                }, 400);
+            }
+        });
+
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.top = '-5vh';
+            heart.style.opacity = Math.random();
+            heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            const duration = Math.random() * 3 + 2;
+            heart.style.animationDuration = duration + 's';
+            document.body.appendChild(heart);
+            setTimeout(() => { heart.remove(); }, duration * 1000);
+        }
+
+        setInterval(createHeart, 100);
+
+        function confettiEffect() {
+            for(let i=0; i<100; i++) {
+                setTimeout(createHeart, i * 20);
+            }
+        }
+    </script>
+</body>
+</html>
